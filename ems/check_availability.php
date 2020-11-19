@@ -3,7 +3,10 @@ require_once("includes/config.php");
 // code for username availablity
 if(!empty($_POST["uname"])) {
 	$usrname=$_POST["uname"];
-	
+	$usrtype=$_POST["type"];
+	if($usrtype=='COMPANY')
+$sql ="SELECT UserName FROM tblcompany WHERE UserName=:usrname";		
+	else	
 $sql ="SELECT UserName FROM tblusers WHERE UserName=:usrname";
 $query= $dbh->prepare($sql);
 $query-> bindParam(':usrname',$usrname, PDO::PARAM_STR);

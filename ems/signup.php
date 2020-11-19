@@ -1,47 +1,99 @@
 <?php
 //datbase connection file
 include('includes/config.php');
-error_reporting(0);
+
+  // require_once(mycontroller . "api.cntrl.php");
+ include("conf/conf.php");
+error_reporting(1);
 // Signup Process
 if(isset($_POST['signup']))
 {
 
 // Getting Post values
-$fname=$_POST['name'];
+$companyname=$_POST['name'];
 $uname=$_POST['username'];
+$address=$_POST['address'];
+$contact_person=$_POST['contact_person']; 
 $emailid=$_POST['email'];   
-$pnumber=$_POST['phonenumber']; 
-$gender=$_POST['gender']; 
+$pnumber=$_POST['phone_no']; 
 $password=md5($_POST['pass']);  
+$cpassword=md5($_POST['confirm_pass']);  
+
+if($password==$cpassword)
+{
+  $flds = array(
+        "name",
+        "username",
+        "address",
+        "email",
+        "phono_no",
+        "contact_person",
+        "password",
+        "status",
+        "created_at",
+    );
+
+
+    $vls = array($companyname,
+        $uname,
+        $address,
+        $emailid,
+        $pnumber,
+        $contact_person,
+        $password,
+        "1",
+        date('Y-m-d')
+      
+    );
+
+
 $status=1;
 // query for data insertion
-$sql="INSERT INTO tblusers(FullName,UserName,Emailid,PhoneNumber,UserGender,UserPassword,IsActive) VALUES(:fname,:uname,:emailid,:pnumber,:gender,:password,:status)";
-//preparing the query
-$query = $dbh->prepare($sql);
-//Binding the values
-$query->bindParam(':fname',$fname,PDO::PARAM_STR);
-$query->bindParam(':uname',$uname,PDO::PARAM_STR);
-$query->bindParam(':emailid',$emailid,PDO::PARAM_STR);
-$query->bindParam(':pnumber',$pnumber,PDO::PARAM_STR);
-$query->bindParam(':gender',$gender,PDO::PARAM_STR);
-$query->bindParam(':password',$password,PDO::PARAM_STR);
-$query->bindParam(':status',$status,PDO::PARAM_STR);
-//Execute the query
-$query->execute();
+// $sql="INSERT INTO tblusers(FullName,UserName,Emailid,PhoneNumber,UserGender,UserPassword,IsActive) VALUES(:fname,:uname,:emailid,:pnumber,:gender,:password,:status)";
+// //preparing the query
+// $query = $dbh->prepare($sql);
+// //Binding the values
+// $query->bindParam(':fname',$fname,PDO::PARAM_STR);
+// $query->bindParam(':uname',$uname,PDO::PARAM_STR);
+// $query->bindParam(':emailid',$emailid,PDO::PARAM_STR);
+// $query->bindParam(':pnumber',$pnumber,PDO::PARAM_STR);
+// $query->bindParam(':gender',$gender,PDO::PARAM_STR);
+// $query->bindParam(':password',$password,PDO::PARAM_STR);
+// $query->bindParam(':status',$status,PDO::PARAM_STR);
+// //Execute the query
+// $query->execute();
+
+            $row_check = $wcntr->check_exist("tblcompany", "username", $uname);
+
+if (isset($row_check['id'])) {
+                $msg = "User Name is Already in use!";
+                echo "<script>alert('Error : ".$msg."');</script>";   
+            } else {
+                $txtabtsave = $wcntr->insert_data("tblcompany", $flds, $vls);
+               echo "<script>alert('Success : User signup successfull. Now you can signin');</script>";
+                echo "<script>window.location.href='signin.php'</script>";
+            }
+
+
 //Check that the insertion really worked
-$lastInsertId = $dbh->lastInsertId();
-if($lastInsertId)
-{
-echo "<script>alert('Success : User signup successfull. Now you can signin');</script>";
-echo "<script>window.location.href='signin.php'</script>";	
-}
-else 
-{
-echo "<script>alert('Error : Something went wrong. Please try again');</script>";	
-}
+//$lastInsertId = $dbh->lastInsertId();
+// if($lastInsertId)
+// {
+// echo "<script>alert('Success : User signup successfull. Now you can signin');</script>";
+// echo "<script>window.location.href='signin.php'</script>";	
+// }
+// else 
+// {
+// echo "<script>alert('Error : Something went wrong. Please try again');</script>";	
+// }
 
 }
-
+else
+{
+     echo "<script>alert('Error : Mismatch Confirm Password!');</script>";
+                echo "<script>window.location.href='signup.php'</script>";
+}
+}
     ?>
 
 <!doctype html>
@@ -75,11 +127,20 @@ echo "<script>alert('Error : Something went wrong. Please try again');</script>"
 		<!-- modernizr css -->
         <script src="js/vendor/modernizr-2.8.3.min.js"></script>
 <script>
+    function checkpassword(){
+        $pwd=$('#pass').val();
+        $cfrmpwd=$('#confirm_pwd').val();
+        if($pwd!=$cfrmpwd)
+        {
+            $("#userpwd-status").html('Mismatch Confirm Password!');
+
+        }
+    }
 function checkusernameAvailability() {
 $("#loaderIcon").show();
 jQuery.ajax({
 url: "check_availability.php",
-data:'uname='+$("#username").val(),
+data:{'uname':$("#username").val(),'type':'COMPANY' },
 type: "POST",
 success:function(data){
 $("#username-availabilty-status").html(data);
@@ -129,19 +190,22 @@ error:function (){}
                                         <form name="signup" method="post">
                                             <div class="col-md-12 col-sm-6 col-xs-12 lyt-left">
                                                 <div class="input-box leave-ib">
-<input type="text" placeholder="Name" class="info" name="name" required="true">
+<input type="text" placeholder="Company Name" class="info" name="name" required="true">
+
 <input type="text" placeholder="Username" class="info" name="username" id="username" required="true" onBlur="checkusernameAvailability()">
 <span id="username-availabilty-status" style="font-size:14px;"></span> 
+<textarea placeholder="Address" class="info"   name="address" required="true"></textarea>
 <input type="email" placeholder="Email Id" class="info" name="email" required="true">
-<input type="tel" placeholder="Phone Number" pattern="[0-9]{10}" title="10 numeric characters only" class="info" name="phonenumber" maxlength="10" required="true">
-<select class="info" name="gender" required="true">
-<option value="">Select Gender</option>	
-<option value="Male">Male</option>
-<option value="Female">Female</option>
-<option value="Transgender">Transgender</option>
-</select>
-<input type="password" name="pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" placeholder="Password" title="at least one number and one uppercase and lowercase letter, and at least 6 or more characters" class="info" required /> 
+<input type="text" placeholder="Contact Person" class="info" name="contact_person" id="contact_person" required="true" >
+
+<input type="tel" placeholder="Phone Number" pattern="[0-9]{10}" title="10 numeric characters only" class="info" name="phone_no" maxlength="10" required="true">
+
+<input type="password" name="pass" id="pwd" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" placeholder="Password" title="at least one number and one uppercase and lowercase letter, and at least 6 or more characters" class="info" required /> 
 <span style="font-size:11px; color:red">Password atleast one number and one uppercase and lowercase letter, and at least 6 or more characters</span>
+
+<input type="password" name="confirm_pass" id="confirm_pwd" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}" placeholder="Confirm Password" title="at least one number and one uppercase and lowercase letter, and at least 6 or more characters" class="info" required onblur="checkpassword();" /> 
+
+<span id="userpwd-status" style="font-size:14px;"></span>
 </div>
                                             </div>
                                        

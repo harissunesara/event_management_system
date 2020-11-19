@@ -9,8 +9,10 @@ if(isset($_POST['signin']))
 //Getting Post Values
 $uname=$_POST['username'];
 $password=md5($_POST['password']);
+print_r($password);
+
 // Quer for signing matching username and password with db details
-$sql ="SELECT Userid,IsActive FROM tblusers WHERE UserName=:uname and UserPassword=:password";
+$sql ="SELECT id,status FROM tblcompany WHERE username=:uname and password=:password";
 //preparing the query
 $query= $dbh -> prepare($sql);
 //Binding the values
@@ -19,11 +21,14 @@ $query-> bindParam(':password', $password, PDO::PARAM_STR);
 //Execute the query
 $query-> execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);
+
+
 if($query->rowCount() > 0)
 {
+
  foreach ($results as $result) {
-    $status=$result->IsActive;
-    $_SESSION['usrid']=$result->Userid;
+    $status=$result->status;
+    $_SESSION['usrid']=$result->id;
   } 
 if($status==0)
 {

@@ -2,7 +2,8 @@
 session_start();
 //datbase connection file
 include('includes/config.php');
-error_reporting(0);
+ include("conf/conf.php");
+error_reporting(1);
 if(strlen($_SESSION['usrid'])==0)
     {   
 header('location:logout.php');
@@ -14,7 +15,7 @@ if(isset($_POST['change']))
 $password=md5($_POST['password']);
 $newpassword=md5($_POST['newpassword']);
 $uid=$_SESSION['usrid'];
-    $sql ="SELECT UserPassword FROM tblusers WHERE Userid=:uid and UserPassword=:password";
+    $sql ="SELECT password FROM tblcompany WHERE id=:uid and password=:password";
 $query= $dbh -> prepare($sql);
 $query-> bindParam(':uid', $uid, PDO::PARAM_STR);
 $query-> bindParam(':password', $password, PDO::PARAM_STR);

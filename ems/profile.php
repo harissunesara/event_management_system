@@ -2,7 +2,8 @@
 session_start();
 //datbase connection file
 include('includes/config.php');
-error_reporting(0);
+ include("conf/conf.php");
+error_reporting(1);
 if(strlen($_SESSION['usrid'])==0)
     {   
 header('location:logout.php');
@@ -15,21 +16,42 @@ if(isset($_POST['update']))
 //Getting User id  
 $uid=$_SESSION['usrid'];
 // Getting Post values
-$fname=$_POST['name'];
+$name=$_POST['name'];
 $emailid=$_POST['email'];   
-$pnumber=$_POST['phonenumber']; 
-$gender=$_POST['gender']; 
+$phone_no=$_POST['phone_no']; 
+$contact_person=$_POST['contact_person']; 
+$address=$_POST['address']; 
+ $flds = array(
+        "name",
+        "address",
+        "email",
+        "phono_no",
+        "contact_person",
+        
+    );
+
+
+    $vls = array(
+        $name,
+        $address,
+        $emailid,
+        $phone_no,
+        $contact_person,
+     
+    );
+//print_r($flds); print_r($vls);die;
+    $wcntr->update_data("tblcompany", $flds, $vls,"id",$uid);
 // query for data updation
-$sql="update  tblusers set FullName=:fname,Emailid=:emailid,PhoneNumber=:pnumber,UserGender=:gender where Userid=:uid ";
-//preparing the query
-$query = $dbh->prepare($sql);
-//Binding the values
-$query->bindParam(':fname',$fname,PDO::PARAM_STR);
-$query->bindParam(':emailid',$emailid,PDO::PARAM_STR);
-$query->bindParam(':pnumber',$pnumber,PDO::PARAM_STR);
-$query->bindParam(':gender',$gender,PDO::PARAM_STR);
-$query->bindParam(':uid',$uid,PDO::PARAM_STR);
-$query->execute();
+// $sql="update  tblusers set FullName=:fname,Emailid=:emailid,PhoneNumber=:pnumber,UserGender=:gender where Userid=:uid ";
+// //preparing the query
+// $query = $dbh->prepare($sql);
+// //Binding the values
+// $query->bindParam(':fname',$fname,PDO::PARAM_STR);
+// $query->bindParam(':emailid',$emailid,PDO::PARAM_STR);
+// $query->bindParam(':pnumber',$pnumber,PDO::PARAM_STR);
+// $query->bindParam(':gender',$gender,PDO::PARAM_STR);
+// $query->bindParam(':uid',$uid,PDO::PARAM_STR);
+// $query->execute();
 
 echo "<script>alert('Success : Profile updated Successfully.');</script>";
 echo "<script>window.location.href='profile.php'</script>";	
@@ -102,11 +124,12 @@ echo "<script>window.location.href='profile.php'</script>";
 
 <?php 
 $uid=$_SESSION['usrid'];
-$sql = "SELECT * from  tblusers where Userid=:uid";
+$sql = "SELECT *,created_at as RegDate,updated_at as LastUpdationDate from  tblcompany where id=:uid";
 $query = $dbh -> prepare($sql);
 $query -> bindParam(':uid',$uid, PDO::PARAM_STR);
 $query->execute();
 $results=$query->fetchAll(PDO::FETCH_OBJ);
+//print_r($results);die();
 $cnt=1;
 if($query->rowCount() > 0)
 {
@@ -114,7 +137,7 @@ foreach($results as $result)
 {    ?> 
                         
                                 <div class="Leave-your-thought mt50">
-                                    <h3 class="aside-title uppercase"><?php echo htmlentities($result->FullName);?>'s Profile</h3>
+                                    <h3 class="aside-title uppercase"><?php echo htmlentities($result->name);?>'s Profile</h3>
 <h5>Reg. Date: <?php echo htmlentities($result->RegDate);?> </h5>
 <?php if($result->LastUpdationDate!=""){?>
 <h5>Last Updation Date: <?php echo htmlentities($result->LastUpdationDate);?> </h5>
@@ -124,16 +147,13 @@ foreach($results as $result)
                                         <form name="signup" method="post">
                                             <div class="col-md-12 col-sm-6 col-xs-12 lyt-left">
                                                 <div class="input-box leave-ib">
-<input type="text" placeholder="Name" class="info" name="name" value="<?php echo htmlentities($result->FullName);?>" required="true">
-<input type="text" placeholder="Username" class="info" name="username" id="username" value="<?php echo htmlentities($result->UserName);?>" readonly="true" >
-<input type="email" placeholder="Email Id" class="info" name="email" required="true" value="<?php echo htmlentities($result->Emailid);?>">
-<input type="tel" placeholder="Phone Number" pattern="[0-9]{10}" title="10 numeric characters only" class="info" name="phonenumber" maxlength="10" required="true" value="<?php echo htmlentities($result->PhoneNumber);?>">
-<select class="info" name="gender" required="true">
-<option value="<?php echo htmlentities($result->UserGender);?>"><?php echo htmlentities($result->UserGender);?></option>	
-<option value="Male">Male</option>
-<option value="Female">Female</option>
-<option value="Transgender">Transgender</option>
-</select>
+<input type="text" placeholder="Name" class="info" name="name" value="<?php echo htmlentities($result->name);?>" required="true">
+<textarea name="address" class="info"><?php echo htmlentities($result->address);?></textarea>
+<input type="text" placeholder="Username" class="info" name="username" id="username" value="<?php echo htmlentities($result->username);?>" readonly="true" >
+<input type="email" placeholder="Email Id" class="info" name="email" required="true" value="<?php echo htmlentities($result->email);?>">
+<input type="text" placeholder="Contact Person" class="info" name="contact_person" id="username" value="<?php echo htmlentities($result->contact_person);?>" >
+<input type="tel" placeholder="Phone Number" pattern="[0-9]{10}" title="10 numeric characters only" class="info" name="phone_no" maxlength="10" required="true" value="<?php echo htmlentities($result->phono_no);?>">
+
 </div>
                                             </div>
                                        

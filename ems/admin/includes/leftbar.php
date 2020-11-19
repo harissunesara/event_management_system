@@ -20,6 +20,9 @@
    <li>
                             <a href="manage-sponsers.php"><i class="fa fa-files-o"></i> Manage Sponsers</a>
                         </li>
+                        <li>
+                            <a href="manage-companys.php"><i class="fa fa-files-o"></i> Manage Company</a>
+                        </li>
 
     <li>
                             <a href="#"><i class="fa fa-table fa-fw"></i> Events<span class="fa arrow"></span></a>
